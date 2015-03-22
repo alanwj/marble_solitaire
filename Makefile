@@ -4,13 +4,17 @@ GTK3_LDLIBS := $(shell pkg-config --libs gtk+-3.0)
 CFLAGS += $(GTK3_CFLAGS)
 LDLIBS += $(GTK3_LDLIBS)
 
-CFLAGS += -std=c99 -Werror -Wall -pedantic -O3
+CFLAGS += -std=c99 -Werror -Wall -pedantic -g
 
-OBJS = marble_solitaire.o gtkmarble.o gtkmarblegrid.o
+OBJS = marble_solitaire.o marble_solitaire_app.o marble_solitaire_app_window.o gtkmarble.o gtkmarblegrid.o
 
 marble_solitaire: $(OBJS)
 
-marble_solitaire.o : gtkmarble.h
+marble_solitaire.o : marble_solitaire_app.h
+
+marble_solitaire_app.o : marble_solitaire_app.h marble_solitaire_app_window.h
+
+marble_solitaire_app_window.o : marble_solitaire_app_window.h marble_solitaire_app.h gtkmarblegrid.h
 
 gtkmarble.o : gtkmarble.h
 
