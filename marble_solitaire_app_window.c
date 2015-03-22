@@ -2,7 +2,7 @@
 
 #include <gtk/gtk.h>
 
-#include "gtkmarblegrid.h"
+#include "marble_grid.h"
 
 struct _MarbleSolitaireAppWindow {
   GtkApplicationWindow parent;
@@ -17,7 +17,7 @@ G_DEFINE_TYPE(MarbleSolitaireAppWindow, marble_solitaire_app_window, GTK_TYPE_AP
 static void marble_solitaire_app_window_init(MarbleSolitaireAppWindow *self) {
   gtk_container_set_border_width(GTK_CONTAINER(self), 8);
 
-  GtkWidget *marble_grid = gtk_marble_grid_new();
+  GtkWidget *marble_grid = marble_grid_new();
   gtk_container_add(GTK_CONTAINER(self), marble_grid);
   gtk_widget_show_all(GTK_WIDGET(marble_grid));
 }
