@@ -15,6 +15,7 @@ struct _MarbleSolitaireAppWindowClass {
 G_DEFINE_TYPE(MarbleSolitaireAppWindow, marble_solitaire_app_window, GTK_TYPE_APPLICATION_WINDOW)
 
 static void marble_solitaire_app_window_init(MarbleSolitaireAppWindow *self) {
+  gtk_window_set_title(GTK_WINDOW(self), "Marble Solitaire");
   gtk_container_set_border_width(GTK_CONTAINER(self), 8);
 
   GtkWidget *marble_grid = marble_grid_new();
