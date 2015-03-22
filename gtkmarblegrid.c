@@ -11,54 +11,88 @@ struct _GtkMarbleGridPrivate {
   GtkMarble *selected;
 };
 
-static void select_marble(GtkMarbleGrid *marble_grid, GtkMarble *marble) {
-  GtkMarble *selected = marble_grid->priv->selected;
-  if (selected != NULL && selected != marble) {
-    gtk_marble_set_state(selected, GTK_MARBLE_UNSELECTED);
+static gboolean is_available(GtkMarbleGrid *marble_grid, gint i, gint j) {
+  if (i < 0 || i > 6 || j < 0 || j > 6 || marble_grid->priv->marbles[i][j] == NULL) {
+    return FALSE;
   }
-  marble_grid->priv->selected = marble;
-  gtk_marble_set_state(marble, GTK_MARBLE_SELECTED);
+  const GtkMarbleState state = gtk_marble_get_state(marble_grid->priv->marbles[i][j]);
+  return state == GTK_MARBLE_EMPTY || state == GTK_MARBLE_ELIGIBLE;
+}
+
+static void find_eligible(GtkMarbleGrid *marble_grid, GtkMarble *eligible[4]) {
+  for (guint x = 0; x < 4; ++x) {
+    eligible[x] = NULL;
+  }
+
+  if (marble_grid->priv->selected == NULL) {
+    return;
+  }
+
+  const gint i = gtk_marble_get_i(marble_grid->priv->selected);
+  const gint j = gtk_marble_get_j(marble_grid->priv->selected);
+
+  if (is_available(marble_grid, i - 2, j) && !is_available(marble_grid, i - 1, j)) {
+    eligible[0] = marble_grid->priv->marbles[i - 2][j];
+  }
+
+  if (is_available(marble_grid, i + 2, j) && !is_available(marble_grid, i + 1, j)) {
+    eligible[1] = marble_grid->priv->marbles[i + 2][j];
+  }
+
+  if (is_available(marble_grid, i, j - 2) && !is_available(marble_grid, i, j - 1)) {
+    eligible[2] = marble_grid->priv->marbles[i][j - 2];
+  }
+
+  if (is_available(marble_grid, i, j + 2) && !is_available(marble_grid, i, j + 1)) {
+    eligible[3] = marble_grid->priv->marbles[i][j + 2];
+  }
 }
 
 static void clear_selection(GtkMarbleGrid *marble_grid) {
   if (marble_grid->priv->selected != NULL) {
+    GtkMarble *eligible[4];
+    find_eligible(marble_grid, eligible);
+    for (guint i = 0; i < 4; ++i) {
+      if (eligible[i] != NULL) {
+        gtk_marble_set_state(eligible[i], GTK_MARBLE_EMPTY);
+      }
+    }
     gtk_marble_set_state(marble_grid->priv->selected, GTK_MARBLE_UNSELECTED);
+    marble_grid->priv->selected = NULL;
   }
-  marble_grid->priv->selected = NULL;
+}
+
+static void select_marble(GtkMarbleGrid *marble_grid, GtkMarble *marble) {
+  GtkMarble *selected = marble_grid->priv->selected;
+  if (selected != NULL && selected != marble) {
+    clear_selection(marble_grid);
+  }
+  marble_grid->priv->selected = marble;
+  gtk_marble_set_state(marble, GTK_MARBLE_SELECTED);
+
+  GtkMarble *eligible[4];
+  find_eligible(marble_grid, eligible);
+  for (guint i = 0; i < 4; ++i) {
+    if (eligible[i] != NULL) {
+      gtk_marble_set_state(eligible[i], GTK_MARBLE_ELIGIBLE);
+    }
+  }
 }
 
 static void move_selected(GtkMarbleGrid *marble_grid, GtkMarble *to) {
   GtkMarble *from = marble_grid->priv->selected;
-  if (from == NULL || gtk_marble_get_state(to) != GTK_MARBLE_EMPTY) {
+  if (from == NULL || gtk_marble_get_state(to) != GTK_MARBLE_ELIGIBLE) {
     return;
   }
+  clear_selection(marble_grid);
 
-  const guint ia = gtk_marble_get_i(from);
-  const guint ja = gtk_marble_get_j(from);
-  const guint ib = gtk_marble_get_i(to);
-  const guint jb = gtk_marble_get_j(to);
+  const gint jump_i = (gtk_marble_get_i(from) + gtk_marble_get_i(to)) / 2;
+  const gint jump_j = (gtk_marble_get_j(from) + gtk_marble_get_j(to)) / 2;
 
-  GtkMarble *jump = NULL;
-  if (ia == ib) {
-    if (ja < jb && jb - ja == 2) {
-      jump = marble_grid->priv->marbles[ib][jb - 1];
-    } else if (ja - jb == 2) {
-      jump = marble_grid->priv->marbles[ib][jb + 1];
-    }
-  } else if (ja == jb) {
-    if (ia < ib && ib - ia == 2) {
-      jump = marble_grid->priv->marbles[ib - 1][jb];
-    } else if (ia - ib == 2) {
-      jump = marble_grid->priv->marbles[ib + 1][jb];
-    }
-  }
-
-  if (jump != NULL && gtk_marble_get_state(jump) == GTK_MARBLE_UNSELECTED) {
-    gtk_marble_set_state(from, GTK_MARBLE_EMPTY);
-    gtk_marble_set_state(jump, GTK_MARBLE_EMPTY);
-    gtk_marble_set_state(to, GTK_MARBLE_UNSELECTED);
-    marble_grid->priv->selected = NULL;
-  }
+  GtkMarble *jump = marble_grid->priv->marbles[jump_i][jump_j];
+  gtk_marble_set_state(from, GTK_MARBLE_EMPTY);
+  gtk_marble_set_state(jump, GTK_MARBLE_EMPTY);
+  gtk_marble_set_state(to, GTK_MARBLE_UNSELECTED);
 }
 
 static gboolean marble_clicked(GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -77,6 +111,7 @@ static gboolean marble_clicked(GtkWidget *widget, GdkEventButton *event, gpointe
     clear_selection(marble_grid);
     break;
    case GTK_MARBLE_EMPTY:
+     break;
    case GTK_MARBLE_ELIGIBLE:
     move_selected(marble_grid, marble);
     break;
@@ -85,8 +120,8 @@ static gboolean marble_clicked(GtkWidget *widget, GdkEventButton *event, gpointe
   return TRUE;
 }
 
-static void add_marble_row(GtkMarbleGrid *marble_grid, guint i, guint jmin, guint jmax) {
-  for (guint j = 0; j < 7; ++j) {
+static void add_marble_row(GtkMarbleGrid *marble_grid, gint i, gint jmin, gint jmax) {
+  for (gint j = 0; j < 7; ++j) {
     if (jmin <= j && j <= jmax) {
       GtkWidget *marble = gtk_marble_new(i, j);
       gtk_grid_attach(GTK_GRID(marble_grid), marble, i, j, 1, 1);

@@ -5,8 +5,8 @@
 typedef struct _GtkMarblePrivate    GtkMarblePrivate;
 
 struct _GtkMarblePrivate {
-  guint i;
-  guint j;
+  gint i;
+  gint j;
 
   GtkMarbleState state;
 };
@@ -41,8 +41,8 @@ static void gtk_marble_get_property(GObject *object, guint property_id, GValue *
 static gboolean gtk_marble_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
   GtkMarble *marble = GTK_MARBLE(widget);
 
-  const guint i = marble->priv->i;
-  const guint j = marble->priv->j;
+  const gint i = marble->priv->i;
+  const gint j = marble->priv->j;
   const guint width = gtk_widget_get_allocated_width(widget);
   const guint height = gtk_widget_get_allocated_height(widget);
 
@@ -85,7 +85,7 @@ static gboolean gtk_marble_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
   }
   cairo_stroke(cr);
 
-  if (marble->priv->state == GTK_MARBLE_EMPTY) {
+  if (marble->priv->state == GTK_MARBLE_EMPTY || marble->priv->state == GTK_MARBLE_ELIGIBLE) {
     return TRUE;
   }
 
@@ -137,7 +137,7 @@ static void gtk_marble_init(GtkMarble *marble) {
   g_signal_connect(marble, "draw", G_CALLBACK(gtk_marble_draw), NULL);
 }
 
-GtkWidget *gtk_marble_new(guint i, guint j) {
+GtkWidget *gtk_marble_new(gint i, gint j) {
   return GTK_WIDGET(g_object_new(GTK_TYPE_MARBLE, "i", i, "j", j, NULL));
 }
 
@@ -150,10 +150,10 @@ void gtk_marble_set_state(GtkMarble *marble, GtkMarbleState state) {
   gtk_widget_queue_draw(GTK_WIDGET(marble));
 }
 
-guint gtk_marble_get_i(const GtkMarble *marble) {
+gint gtk_marble_get_i(const GtkMarble *marble) {
   return marble->priv->i;
 }
 
-guint gtk_marble_get_j(const GtkMarble *marble) {
+gint gtk_marble_get_j(const GtkMarble *marble) {
   return marble->priv->j;
 }

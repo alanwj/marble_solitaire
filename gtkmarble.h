@@ -31,12 +31,12 @@ struct _GtkMarbleClass {
 
 GType gtk_marble_get_type();
 
-GtkWidget *gtk_marble_new(guint i, guint j);
+GtkWidget *gtk_marble_new(gint i, gint j);
 
 GtkMarbleState gtk_marble_get_state(const GtkMarble *marble);
 void gtk_marble_set_state(GtkMarble *marble, GtkMarbleState state);
 
-guint gtk_marble_get_i(const GtkMarble *marble);
-guint gtk_marble_get_j(const GtkMarble *marble);
+gint gtk_marble_get_i(const GtkMarble *marble);
+gint gtk_marble_get_j(const GtkMarble *marble);
 
 #endif    // GTK_MARBLE_H_
