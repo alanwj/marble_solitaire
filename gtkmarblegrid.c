@@ -6,6 +6,15 @@
 
 typedef struct _GtkMarbleGridPrivate    GtkMarbleGridPrivate;
 
+struct _GtkMarbleGrid {
+  GtkGrid parent;
+  struct _GtkMarbleGridPrivate *priv;
+};
+
+struct _GtkMarbleGridClass {
+  GtkGridClass parent_class;
+};
+
 struct _GtkMarbleGridPrivate {
   GtkMarble *marbles[7][7];
   GtkMarble *selected;

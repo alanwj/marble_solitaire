@@ -4,6 +4,15 @@
 
 typedef struct _GtkMarblePrivate    GtkMarblePrivate;
 
+struct _GtkMarble {
+  GtkDrawingArea parent;
+  struct _GtkMarblePrivate *priv;
+};
+
+struct _GtkMarbleClass {
+  GtkDrawingAreaClass parent_class;
+};
+
 struct _GtkMarblePrivate {
   gint i;
   gint j;

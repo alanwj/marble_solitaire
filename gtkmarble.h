@@ -20,15 +20,6 @@ typedef enum _GtkMarbleState {
   GTK_MARBLE_EMPTY
 } GtkMarbleState;
 
-struct _GtkMarble {
-  GtkDrawingArea parent;
-  struct _GtkMarblePrivate *priv;
-};
-
-struct _GtkMarbleClass {
-  GtkDrawingAreaClass parent_class;
-};
-
 GType gtk_marble_get_type();
 
 GtkWidget *gtk_marble_new(gint i, gint j);

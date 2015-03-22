@@ -13,15 +13,6 @@
 typedef struct _GtkMarbleGrid             GtkMarbleGrid;
 typedef struct _GtkMarbleGridClass        GtkMarbleGridClass;
 
-struct _GtkMarbleGrid {
-  GtkGrid parent;
-  struct _GtkMarbleGridPrivate *priv;
-};
-
-struct _GtkMarbleGridClass {
-  GtkGridClass parent_class;
-};
-
 GType gtk_marble_grid_get_type();
 
 GtkWidget *gtk_marble_grid_new();
