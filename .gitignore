@@ -6,3 +6,17 @@
 
 # Output binaries
 marble_solitaire
+
+# Autotools generated files
+Makefile
+Makefile.in
+.deps
+/autom4te.cache
+/aclocal.m4
+/compile
+/config.log
+/config.status
+/configure
+/depcomp
+/install-sh
+/missing
