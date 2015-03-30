@@ -3,6 +3,10 @@
 
 # Editor detritus
 *.swp
+*.swo
+
+# Built sources
+/src/resources.c
 
 # Output binaries
 marble_solitaire

@@ -1,6 +1,9 @@
 #include "marble.h"
 
 #include <gtk/gtk.h>
+#include <stdlib.h>
+
+#define   MARBLE_RESOURCE_PATH  "/com/alanwj/marble_solitaire/sphere.svg"
 
 typedef struct _MarblePrivate   MarblePrivate;
 
@@ -11,6 +14,7 @@ struct _Marble {
 
 struct _MarbleClass {
   GtkDrawingAreaClass parent_class;
+  GdkPixbuf *pixbuf;
 };
 
 struct _MarblePrivate {
@@ -55,58 +59,42 @@ static gboolean marble_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
   const guint width = gtk_widget_get_allocated_width(widget);
   const guint height = gtk_widget_get_allocated_height(widget);
 
-  cairo_scale(cr, width, height);
-
-  // 1px line width
-  double ux = 1;
-  double uy = 1;
-  cairo_device_to_user_distance(cr, &ux, &uy);
-  if (ux < uy) {
-    ux = uy;
-  }
-  cairo_set_line_width(cr, ux);
 
   // draw background
-  if (marble->priv->state == MARBLE_ELIGIBLE) {
+  if (marble->priv->state == MARBLE_ELIGIBLE || marble->priv->state == MARBLE_SELECTED) {
     cairo_set_source_rgb(cr, 0.8, 1.0, 0.8);
   } else {
     cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
   }
   cairo_rectangle(cr, 0.0, 0.0, 1.0, 1.0);
+  cairo_rectangle(cr, 0.0, 0.0, width, height);
   cairo_fill(cr);
 
   // draw border
   cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
-  cairo_move_to(cr, 1.0, 0.0);
-  cairo_line_to(cr, 1.0, 1.0);
-  cairo_line_to(cr, 0.0, 1.0);
+  cairo_move_to(cr, width, 0.0);
+  cairo_line_to(cr, width, height);
+  cairo_line_to(cr, 0.0, height);
   if ((y == 0) ||
       (y == 1 && (x == 1 || x == 5)) ||
       (y == 2 && (x == 0 || x == 6))) {
     cairo_move_to(cr, 0.0, 0.0);
-    cairo_line_to(cr, 1.0, 0.0);
+    cairo_line_to(cr, width, 0.0);
   }
   if ((x == 0) ||
       (x == 1 && (y == 1 || y == 5)) ||
       (x == 2 && (y == 0 || y == 6))) {
     cairo_move_to(cr, 0.0, 0.0);
-    cairo_line_to(cr, 0.0, 1.0);
+    cairo_line_to(cr, 0.0, height);
   }
   cairo_stroke(cr);
 
   if (marble->priv->state == MARBLE_EMPTY || marble->priv->state == MARBLE_ELIGIBLE) {
     return TRUE;
   }
-
-  if (marble->priv->state == MARBLE_UNSELECTED) {
-    cairo_set_source_rgb(cr, 0.3, 0.3, 0.8);
-  } else {
-    cairo_set_source_rgb(cr, 0.0, 0.8, 0.0);
-  }
-
-  cairo_arc(cr, 0.5, 0.5, 0.4, 0.0, 2.0 * G_PI);
-  cairo_fill(cr);
-
+  gdk_cairo_set_source_pixbuf(cr, MARBLE_GET_CLASS(marble)->pixbuf, 5.0, 5.0);
+  cairo_paint(cr);
+  cairo_scale(cr, width, height);
   return TRUE;
 }
 
@@ -134,6 +122,13 @@ static void marble_class_init(MarbleClass *klass) {
                                              G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties(G_OBJECT_CLASS(klass), N_PROPERTIES, obj_properties);
+
+  GError *error = NULL;
+  klass->pixbuf = gdk_pixbuf_new_from_resource_at_scale(MARBLE_RESOURCE_PATH, 40, 40, FALSE, &error);
+  if (error != NULL) {
+    g_print("Internal error loading resource: %s\n", error->message);
+    exit(1);
+  }
 }
 
 static void marble_init(Marble *marble) {

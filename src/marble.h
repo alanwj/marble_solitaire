@@ -3,8 +3,9 @@
 
 #include <gtk/gtk.h>
 
-#define MARBLE_TYPE   (marble_get_type())
-#define MARBLE(obj)   (G_TYPE_CHECK_INSTANCE_CAST((obj), MARBLE_TYPE, Marble))
+#define MARBLE_TYPE             (marble_get_type())
+#define MARBLE(obj)             (G_TYPE_CHECK_INSTANCE_CAST((obj), MARBLE_TYPE, Marble))
+#define MARBLE_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS((obj), MARBLE_TYPE, MarbleClass))
 
 typedef struct _Marble        Marble;
 typedef struct _MarbleClass   MarbleClass;
