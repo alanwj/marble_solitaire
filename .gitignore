@@ -15,6 +15,7 @@ marble_solitaire
 Makefile
 Makefile.in
 .deps
+.dirstamp
 /autom4te.cache
 /aclocal.m4
 /compile
