@@ -1,6 +1,7 @@
 bin_PROGRAMS = marble_solitaire
 
-marble_solitaire_CFLAGS = @GTK_CFLAGS@ -std=c99 -Wall -Werror -pedantic
+marble_solitaire_CFLAGS = -std=c99 -Wall -Werror -pedantic
+marble_solitaire_CPPFLAGS = @GTK_CFLAGS@
 marble_solitaire_LDADD = @GTK_LIBS@
 
 marble_solitaire_SOURCES = \
